@@ -5,6 +5,7 @@ from .help_coder import HelpCoder
 from .udiff_coder import UnifiedDiffCoder
 from .wholefile_coder import WholeFileCoder
 from .ask_coder import AskCoder
+from .sgpt_coder import SgptCoder
 
 __all__ = [
     HelpCoder,
@@ -14,4 +15,5 @@ __all__ = [
     EditBlockFencedCoder,
     WholeFileCoder,
     UnifiedDiffCoder,
+    SgptCoder,
 ]

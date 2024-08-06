@@ -14,6 +14,7 @@ import time
 import traceback
 from collections import defaultdict
 from datetime import datetime
+from distro import name as distro_name
 from json.decoder import JSONDecodeError
 from pathlib import Path
 
@@ -758,6 +759,23 @@ class Coder:
         return None
 
     def fmt_system_prompt(self, prompt):
+        def _os_name() -> str:
+            current_platform = platform.system()
+            if current_platform == "Linux":
+                return "Linux/" + distro_name(pretty=True)
+            if current_platform == "Windows":
+                return "Windows " + platform.release()
+            if current_platform == "Darwin":
+                return "Darwin/MacOS " + platform.mac_ver()[0]
+            return current_platform
+
+        def _shell_name() -> str:
+            current_platform = platform.system()
+            if current_platform in ("Windows", "nt"):
+                is_powershell = len(os.getenv("PSModulePath", "").split(os.pathsep)) >= 3
+                return "powershell.exe" if is_powershell else "cmd.exe"
+            return os.path.basename(os.getenv("SHELL", "/bin/sh"))
+            
         lazy_prompt = self.gpt_prompts.lazy_prompt if self.main_model.lazy else ""
 
         platform_text = f"- Platform: {platform.platform()}\n"
@@ -780,6 +798,8 @@ class Coder:
             fence=self.fence,
             lazy_prompt=lazy_prompt,
             platform=platform_text,
+            os=_os_name(),
+            shell=_shell_name(),
         )
         return prompt
 
