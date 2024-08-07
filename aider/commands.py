@@ -42,14 +42,6 @@ class Commands:
     def cmd_sgpt(self, args):
         "Run a command using the ShellGPT model"
 
-        def execute(cls, shell_command: str) -> str:
-            process = subprocess.Popen(
-                shell_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
-            output, _ = process.communicate()
-            exit_code = process.returncode
-            return f"Exit code: {exit_code}, Output:\n{output.decode()}"
-
         if not args.strip():
             self.io.tool_error("Please provide a question or topic for the chat.")
             return
@@ -71,9 +63,19 @@ class Commands:
             dict(role="assistant", content=assistant_msg),
         ]
 
-        # TODO: execute the command returned by the model
-
         self.coder.total_cost += chat_coder.total_cost
+
+        option = self.io.prompt_ask(
+            f"Execute the command `{assistant_msg}`? (y/n): ", default="n"
+        ).strip()
+
+        if option.lower() in ["yes", "y"]:
+            self.cmd_run(
+                args=assistant_msg, 
+                add_on_nonzero_exit=True
+            )
+        elif option.lower() in ["no", "n"]:
+            return
 
     def cmd_model(self, args):
         "Switch to a new LLM"
