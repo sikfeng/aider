@@ -29,8 +29,6 @@ class RepoMap:
     CACHE_VERSION = 3
     TAGS_CACHE_DIR = f".aider.tags.cache.v{CACHE_VERSION}"
 
-    cache_missing = False
-
     warned_files = set()
 
     def __init__(
@@ -52,6 +50,7 @@ class RepoMap:
         self.root = root
 
         self.load_tags_cache()
+        self.cache_threshold = 0.95
 
         self.max_map_tokens = map_tokens
         self.map_mul_no_files = map_mul_no_files
@@ -260,12 +259,17 @@ class RepoMap:
         # https://networkx.org/documentation/stable/_modules/networkx/algorithms/link_analysis/pagerank_alg.html#pagerank
         personalize = 100 / len(fnames)
 
-        if self.cache_missing:
-            fnames = tqdm(fnames)
-        self.cache_missing = False
+        if len(fnames) - len(self.TAGS_CACHE) > 100:
+            self.io.tool_output(
+                "Initial repo scan can be slow in larger repos, but only happens once."
+            )
+            fnames = tqdm(fnames, desc="Scanning repo")
+            showing_bar = True
+        else:
+            showing_bar = False
 
         for fname in fnames:
-            if progress:
+            if progress and not showing_bar:
                 progress()
 
             if not Path(fname).is_file():
@@ -295,9 +299,6 @@ class RepoMap:
                 continue
 
             for tag in tags:
-                if progress:
-                    progress()
-
                 if tag.kind == "def":
                     defines[tag.name].add(rel_fname)
                     key = (rel_fname, tag.name)
