@@ -24,7 +24,7 @@ FROM base AS aider-full
 ENV AIDER_DOCKER_IMAGE=sikfeng/aider-full
 
 COPY . /tmp/aider
-RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
+RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip boto3 \
     && /venv/bin/python -m pip install --no-cache-dir /tmp/aider[help,browser,playwright] \
        --extra-index-url https://download.pytorch.org/whl/cpu \
     && rm -rf /tmp/aider
@@ -40,7 +40,7 @@ FROM base AS aider
 ENV AIDER_DOCKER_IMAGE=sikfeng/aider
 
 COPY . /tmp/aider
-RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
+RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip boto3 \
     && /venv/bin/python -m pip install --no-cache-dir /tmp/aider \
        --extra-index-url https://download.pytorch.org/whl/cpu \
     && rm -rf /tmp/aider
