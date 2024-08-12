@@ -106,6 +106,7 @@ class Commands:
             [
                 ("help", "Get help about using aider (usage, config, troubleshoot)."),
                 ("ask", "Ask questions about your code without making any changes."),
+                ("sgpt", "Get a shell command to perform a task."),
                 ("code", "Ask for changes to your code (using the best edit format)."),
             ]
         )
