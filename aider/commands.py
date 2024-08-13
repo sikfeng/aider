@@ -695,7 +695,7 @@ class Commands:
         combined_output = None
         instructions = None
         try:
-            result = subprocess.run(
+            process = subprocess.Popen(
                 args,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -704,17 +704,25 @@ class Commands:
                 encoding=self.io.encoding,
                 errors="replace",
             )
-            combined_output = result.stdout
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
+                    break
+                if output:
+                    self.io.tool_output(output.strip())
+            
+            rc = process.returncode
+            
         except Exception as e:
             self.io.tool_error(f"Error running command: {e}")
 
-        if combined_output is None:
-            return
+        #if combined_output is None:
+        #    return
 
-        self.io.tool_output(combined_output)
+        #self.io.tool_output(combined_output)
 
         if add_on_nonzero_exit:
-            add = result.returncode != 0
+            add = rc != 0
         else:
             response = self.io.prompt_ask(
                 "Add the output to the chat? (y/n/instructions): ", default="y"

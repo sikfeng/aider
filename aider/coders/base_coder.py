@@ -953,6 +953,18 @@ class Coder:
             self.partial_response_content = self.get_multi_response_content(True)
             self.multi_response_content = ""
 
+            cmd_matches = re.finditer(r"```(?:bash|sh|shell)\n([\s\S]*?)\n```", self.partial_response_content)
+            for match in cmd_matches:
+                option = self.io.prompt_ask(
+                    f"Execute the command `{match.group(1)}`? (y/n): ", default="n"
+                ).strip()
+
+                if option.lower() in ["yes", "y"]:
+                    self.commands.cmd_run(
+                        args=match.group(1), 
+                        add_on_nonzero_exit=True
+                    )
+
         self.io.tool_output()
 
         if self.usage_report:
